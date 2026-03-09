@@ -1,0 +1,9 @@
+# User config - contains webhook URL
+config.json
+
+# Log files
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

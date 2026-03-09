@@ -1,0 +1,4 @@
+{
+  "webhook_url": "https://www.feishu.cn/flow/api/trigger-webhook/YOUR_WEBHOOK_ID_HERE",
+  "max_prompt_length": 100
+}
