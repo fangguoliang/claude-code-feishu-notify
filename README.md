@@ -41,7 +41,8 @@ Task Done
 
 <img width="1600" height="820" alt="image" src="https://github.com/user-attachments/assets/a1897e2c-7a91-4b96-8d71-1f7f99c07456" />
 
-5）. 发布机器人
+5）. 启用流程
+6）. 发布机器人
 
 ### 2. 安装配置
 
