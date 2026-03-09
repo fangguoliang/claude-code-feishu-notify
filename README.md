@@ -26,22 +26,22 @@ Task Done
 
 ### 1. 创建飞书群机器人
 
-1.访问登录“创建飞书机器人”链接：https://botbuilder.feishu.cn/home/my-app
+1）.访问登录“创建飞书机器人”链接：https://botbuilder.feishu.cn/home/my-app
 <img width="1587" height="327" alt="image" src="https://github.com/user-attachments/assets/d86addda-f0e5-4c5f-bea9-3b3ee34d3df4" />
 
-2. 在飞书官网，创建机器人应用流程：创建名称、创建流程
-3. 添加配置流程中第一个节点“Webhook触发”，配置内容如图所示，复制webhook链接，后面应用配置时会用到。
+2）. 在飞书官网，创建机器人应用流程：创建名称、创建流程
+3）. 添加配置流程中第一个节点“Webhook触发”，配置内容如图所示，复制webhook链接，后面应用配置时会用到。
 这里的参数配置为
 ```bash
 {"msgtype":"text","content":{"text":"test"}}
 ```
 <img width="1600" height="811" alt="image" src="https://github.com/user-attachments/assets/3ff44b72-920e-4c6a-a72b-6b69950fe051" />
    
-4. 配置流程的第二个节点“发送飞书消息”：配置消息内容时，点击“加号”按键添加变量，选择content.text
+4）. 配置流程的第二个节点“发送飞书消息”：配置消息内容时，点击“加号”按键添加变量，选择content.text
 
 <img width="1600" height="820" alt="image" src="https://github.com/user-attachments/assets/a1897e2c-7a91-4b96-8d71-1f7f99c07456" />
 
-5. 发布机器人
+5）. 发布机器人
 
 ### 2. 安装配置
 
