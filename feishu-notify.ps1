@@ -6,6 +6,14 @@ param([Parameter(ValueFromPipeline=$true)]$InputObject)
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 
+# Function to check if Windows is locked (lock screen active)
+# Only sends notifications when screen is locked to avoid frequent interruptions
+function Test-LockScreen {
+    # When Windows is locked, logonui.exe process runs
+    $logonUI = Get-Process -Name "logonui" -ErrorAction SilentlyContinue
+    return ($null -ne $logonUI)
+}
+
 # Get script directory
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 
@@ -145,7 +153,16 @@ $message += "`n【CC任务进展】`n" + $taskStatus
 $message += "`n" + $timestamp
 
 # Log
-Add-Content -Path $logFile -Value "[$timestamp] Hook: $hookType, Message sent" -Encoding UTF8
+Add-Content -Path $logFile -Value "[$timestamp] Hook: $hookType, Content: $taskStatus" -Encoding UTF8
+
+# Check lock screen status - only send notification when screen is locked
+# This prevents frequent notifications while you're actively using the computer
+if (-not (Test-LockScreen)) {
+    Add-Content -Path $logFile -Value "[$timestamp] Skipped: Screen not locked (press Win+L to lock)" -Encoding UTF8
+    exit 0
+}
+
+Add-Content -Path $logFile -Value "[$timestamp] Screen locked, sending notification..." -Encoding UTF8
 
 # Send to Feishu
 $body = @{msg_type="text"; content=@{text=$message}} | ConvertTo-Json -Depth 3
