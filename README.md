@@ -191,9 +191,26 @@ claude-code-feishu-notify/
 
 确保脚本文件使用 UTF-8 编码保存。
 
+### Q: 收到 "unknown" 的消息？
+
+如果消息显示 `Hook: unknown` 或项目路径显示 `unknown`，可能是 JSON 解析失败。v1.1.0 版本已修复此问题，增加了正则表达式回退机制，确保即使 JSON 解析失败也能正确提取关键字段。
+
+请更新到最新版本：
+```bash
+cd claude-code-feishu-notify
+git pull origin master
+```
+
 ### Q: Mac/Linux 如何使用？
 
 脚本目前为 PowerShell 版本，Mac/Linux 用户可以使用 `pwsh` 命令运行，或自行转换为 Bash 脚本。
+
+## 更新日志
+
+### v1.1.0 (2026-03-22)
+- **修复**: JSON 解析失败时消息显示 "unknown" 的问题
+- 增加 regex fallback 机制，当 `ConvertFrom-Json` 失败时使用正则提取关键字段
+- 增加解析错误日志记录，便于调试
 
 ## License
 
