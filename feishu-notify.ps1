@@ -94,12 +94,27 @@ $hookType = if ($env:CLAUDE_HOOK_TYPE) { $env:CLAUDE_HOOK_TYPE } else { "unknown
 $stopReason = ""
 $content = ""
 
-# Parse JSON
+# Parse JSON - use ErrorAction Stop to catch parsing failures
+$json = $null
+$jsonParseSuccess = $false
+
 try {
-    $json = $stdinData | ConvertFrom-Json -ErrorAction SilentlyContinue
+    $json = $stdinData | ConvertFrom-Json -ErrorAction Stop
+    $jsonParseSuccess = $true
+} catch {
+    Add-Content -Path $logFile -Value "[$timestamp] JSON Parse Error: $($_.Exception.Message.Substring(0, [Math]::Min(200, $_.Exception.Message.Length)))" -Encoding UTF8
+}
+
+# Initialize projectPath for later use
+$projectPath = "unknown"
+
+# Extract values from parsed JSON or use regex fallback
+if ($jsonParseSuccess -and $json) {
     if ($json.hook_event_name) { $hookType = $json.hook_event_name }
     if ($json.message) { $content = $json.message }
     if ($json.reason) { $stopReason = $json.reason }
+    if ($json.cwd) { $projectPath = $json.cwd }
+
     if ($json.tool_input) {
         $ti = $json.tool_input
         if ($ti.questions -and $ti.questions.Count -gt 0) {
@@ -120,16 +135,28 @@ try {
     }
     if ($json.tool_name -and !$content) { $content = "Tool: " + $json.tool_name }
     if ($json.notification_type -and !$content) { $content = $json.notification_type }
-} catch {
+} else {
+    # Fallback: extract values using regex when JSON parsing fails
+    Add-Content -Path $logFile -Value "[$timestamp] Using regex fallback for parsing" -Encoding UTF8
+
+    if ($stdinData -match '"hook_event_name"\s*:\s*"([^"]+)"') { $hookType = $matches[1] }
     if ($stdinData -match '"reason"\s*:\s*"([^"]+)"') { $stopReason = $matches[1] }
     if ($stdinData -match '"message"\s*:\s*"([^"]+)"') { $content = $matches[1] }
+    if ($stdinData -match '"cwd"\s*:\s*"([^"]+)"') { $projectPath = $matches[1] -replace '\\\\', '\' }
+    if ($stdinData -match '"notification_type"\s*:\s*"([^"]+)"') { if (-not $content) { $content = $matches[1] } }
 }
 
-# Build message
-$projectPath = if ($json.cwd) { $json.cwd } else { "unknown" }
+# Get transcript_path for prompt extraction
+$transcriptPath = $null
+if ($jsonParseSuccess -and $json -and $json.transcript_path) {
+    $transcriptPath = $json.transcript_path
+} elseif ($stdinData -match '"transcript_path"\s*:\s*"([^"]+)"') {
+    $transcriptPath = $matches[1] -replace '\\\\', '\'
+}
+
 $recentPrompt = ""
-if ($json.transcript_path) {
-    $recentPrompt = Get-RecentPrompt -transcriptPath $json.transcript_path -maxLength $maxPromptLength
+if ($transcriptPath) {
+    $recentPrompt = Get-RecentPrompt -transcriptPath $transcriptPath -maxLength $maxPromptLength
 }
 
 $taskStatus = ""
